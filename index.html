@@ -1,0 +1,3144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4faf9">
+  <meta name="description" content="小雯的专属喝水提醒页面。记录今日饮水，和小水滴一起养成喝水好习惯。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2339b8d3'/%3E%3Cpath d='M32 11c-4 9-14 17-14 26a14 14 0 0 0 28 0c0-9-10-17-14-26Z' fill='white'/%3E%3C/svg%3E">
+  <title>小雯的喝水小站 · 记得喝水呀</title>
+  <style>
+    :root {
+      --ink: #163d4a;
+      --ink-soft: #416572;
+      --muted: #5f7b85;
+      --aqua: #45bad4;
+      --teal: #1387a5;
+      --deep: #0c5a70;
+      --mint: #e4f7f2;
+      --line: rgba(22, 61, 74, 0.09);
+      --card: rgba(255, 255, 255, 0.82);
+      --shadow: 0 28px 64px -40px rgba(24, 84, 102, 0.42);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #f7fcfc 0%, #f4faf8 52%, #fbf8f1 100%);
+      font-family: "Avenir Next", "Nunito", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button {
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid rgba(54, 177, 204, 0.45);
+      outline-offset: 3px;
+    }
+
+    svg {
+      display: block;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .ambient::after {
+      position: absolute;
+      inset: 0;
+      content: "";
+      opacity: 0.24;
+      background-image: radial-gradient(rgba(22, 61, 74, 0.13) 0.55px, transparent 0.55px);
+      background-size: 17px 17px;
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 48%);
+      mask-image: linear-gradient(to bottom, #000 0%, transparent 48%);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(18px);
+      will-change: transform;
+    }
+
+    .orb--one {
+      top: -220px;
+      left: -170px;
+      width: 590px;
+      height: 590px;
+      background: radial-gradient(circle at 45% 45%, rgba(109, 211, 228, 0.34), transparent 66%);
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+
+    .orb--two {
+      top: -120px;
+      right: -190px;
+      width: 540px;
+      height: 540px;
+      background: radial-gradient(circle at 48% 48%, rgba(255, 205, 133, 0.25), transparent 66%);
+      animation: drift 22s ease-in-out -6s infinite alternate-reverse;
+    }
+
+    .orb--three {
+      bottom: -260px;
+      left: 34%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle at 50% 50%, rgba(119, 217, 187, 0.22), transparent 66%);
+      animation: drift 20s ease-in-out -10s infinite alternate;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 64px));
+      margin: 0 auto;
+      padding: 28px 0 38px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-mark {
+      display: grid;
+      flex: 0 0 auto;
+      width: 41px;
+      height: 41px;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #67d4df, #1b93b2 72%);
+      box-shadow: 0 11px 22px -12px rgba(13, 112, 137, 0.85), inset 0 1px rgba(255, 255, 255, 0.3);
+      place-items: center;
+    }
+
+    .brand-mark svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .brand-name {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-name small {
+      color: var(--muted);
+      font-size: 7.5px;
+      font-weight: 800;
+      letter-spacing: 0.23em;
+      line-height: 1.2;
+    }
+
+    .today-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 15px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 12px 30px -26px rgba(22, 61, 74, 0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .live-dot {
+      position: relative;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--aqua);
+      box-shadow: 0 0 0 4px rgba(69, 186, 212, 0.12);
+    }
+
+    .live-dot::after {
+      position: absolute;
+      inset: -3px;
+      content: "";
+      border: 1px solid rgba(69, 186, 212, 0.34);
+      border-radius: inherit;
+      animation: dotPulse 2.6s ease-out infinite;
+    }
+
+    .today-divider {
+      width: 1px;
+      height: 11px;
+      background: rgba(22, 61, 74, 0.13);
+    }
+
+    .today-clock {
+      min-width: 34px;
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      padding: 46px 8px 40px;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      min-width: 0;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: #248da6;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.19em;
+      line-height: 1.4;
+    }
+
+    .eyebrow::before {
+      width: 24px;
+      height: 1px;
+      content: "";
+      background: currentColor;
+      opacity: 0.55;
+    }
+
+    .hero h1 {
+      max-width: 620px;
+      margin: 14px 0 16px;
+      font-size: clamp(43px, 5vw, 60px);
+      font-weight: 800;
+      letter-spacing: -0.055em;
+      line-height: 1.09;
+    }
+
+    .highlight {
+      position: relative;
+      display: inline-block;
+      padding: 0 0.04em;
+      color: #0e89a7;
+      background: linear-gradient(180deg, transparent 64%, rgba(98, 207, 222, 0.3) 64%, rgba(98, 207, 222, 0.3) 91%, transparent 91%);
+    }
+
+    .hero-sub {
+      max-width: 425px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      line-height: 1.85;
+    }
+
+    .mascot {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex: 0 0 244px;
+      align-items: center;
+      justify-content: center;
+      width: 244px;
+      min-height: 205px;
+      margin-right: 14px;
+    }
+
+    .mascot::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 214px;
+      height: 214px;
+      content: "";
+      border: 1px dashed rgba(27, 143, 169, 0.22);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(-13deg) scaleY(0.84);
+    }
+
+    .mascot::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 240px;
+      height: 160px;
+      content: "";
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(90, 203, 220, 0.18), transparent 66%);
+      filter: blur(10px);
+      transform: translate(-50%, -50%);
+    }
+
+    .drop-svg {
+      position: relative;
+      z-index: 2;
+      width: 184px;
+      height: auto;
+      filter: drop-shadow(0 24px 24px rgba(35, 139, 163, 0.18));
+      animation: floaty 5.5s ease-in-out infinite;
+    }
+
+    .mascot-note {
+      position: absolute;
+      z-index: 4;
+      top: -2px;
+      right: -15px;
+      padding: 9px 13px;
+      color: var(--ink-soft);
+      font-size: 11.5px;
+      font-weight: 650;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 15px 15px 4px 15px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 13px 26px -23px rgba(22, 61, 74, 0.5);
+      transform: rotate(2deg);
+      backdrop-filter: blur(10px);
+    }
+
+    .spark {
+      position: absolute;
+      z-index: 3;
+      color: #57c8d8;
+      font-size: 15px;
+      line-height: 1;
+      animation: twinkle 3.4s ease-in-out infinite;
+    }
+
+    .spark--one {
+      top: 36px;
+      left: 11px;
+    }
+
+    .spark--two {
+      right: 3px;
+      bottom: 34px;
+      color: #f2bd68;
+      font-size: 12px;
+      animation-delay: -1.4s;
+    }
+
+    .spark--three {
+      top: 88px;
+      right: -5px;
+      color: #91d8d1;
+      font-size: 9px;
+      animation-delay: -2.2s;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.52fr) minmax(330px, 0.9fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      animation: rise 0.7s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+    }
+
+    .intake-card {
+      display: flex;
+      flex-direction: column;
+      padding: 30px 32px 24px;
+    }
+
+    .side {
+      display: grid;
+      gap: 22px;
+    }
+
+    .side .log-card {
+      animation-delay: 0.1s;
+    }
+
+    .reminder-card {
+      animation-delay: 0.05s;
+    }
+
+    .card-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .section-kicker {
+      margin: 0 0 5px;
+      color: #2d9bb3;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      line-height: 1.3;
+    }
+
+    .card-heading h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+    }
+
+    .heading-side {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding-top: 3px;
+    }
+
+    .goal-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      color: #247a50;
+      font-size: 9.5px;
+      font-weight: 750;
+      border-radius: 999px;
+      background: #e3f7e9;
+      animation: popIn 0.35s ease both;
+    }
+
+    .goal-badge::before {
+      width: 5px;
+      height: 5px;
+      margin-right: 5px;
+      content: "";
+      border-radius: 50%;
+      background: #51b477;
+    }
+
+    .reset-btn {
+      padding: 6px 9px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 999px;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .reset-btn:hover {
+      color: var(--ink);
+      background: rgba(22, 61, 74, 0.05);
+    }
+
+    .reset-btn.is-armed {
+      color: #bc5c42;
+      background: #fff1ec;
+    }
+
+    .intake-main {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 34px;
+      align-items: center;
+      margin-top: 21px;
+    }
+
+    .ring-wrap {
+      position: relative;
+      display: grid;
+      width: 250px;
+      height: 250px;
+      place-items: center;
+    }
+
+    .ring-wrap::before {
+      position: absolute;
+      inset: 29px;
+      content: "";
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 27%, #fff, #f4fbfb 72%);
+      box-shadow: inset 0 1px 2px #fff;
+    }
+
+    .ring-wrap::after {
+      position: absolute;
+      inset: 7px;
+      content: "";
+      pointer-events: none;
+      border: 1px dashed rgba(58, 174, 195, 0.23);
+      border-radius: 50%;
+    }
+
+    .ring-svg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ring-track {
+      fill: none;
+      stroke: #e6f3f4;
+      stroke-width: 13;
+    }
+
+    .ring-progress {
+      fill: none;
+      stroke: url(#ringGradient);
+      stroke-width: 13;
+      stroke-linecap: round;
+      filter: drop-shadow(0 5px 7px rgba(43, 170, 197, 0.18));
+      transition: stroke-dashoffset 0.75s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease;
+    }
+
+    .ring-center {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .ring-kicker {
+      color: var(--muted);
+      font-size: 9.5px;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+    }
+
+    .ring-number {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      margin: 2px 0 4px;
+      line-height: 1;
+    }
+
+    .ring-number > span {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.055em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ring-number small {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .ring-goal {
+      padding: 4px 10px;
+      color: var(--muted);
+      font-size: 9.5px;
+      font-weight: 600;
+      border-radius: 999px;
+      background: #eff9fa;
+      transition: color 0.3s ease, background 0.3s ease;
+    }
+
+    .intake-card.is-complete .ring-goal {
+      color: #2a7b52;
+      background: #e6f8ec;
+    }
+
+    .float-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    .float-amount {
+      position: absolute;
+      bottom: 48px;
+      left: 50%;
+      color: #0c8aa8;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 8px rgba(255, 255, 255, 0.8);
+      transform: translateX(-50%);
+      animation: floatUp 1.15s ease-out forwards;
+    }
+
+    .intake-detail {
+      min-width: 0;
+      padding: 3px 0 0;
+    }
+
+    .cups {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    .cup {
+      position: relative;
+      display: inline-block;
+      width: 25px;
+      height: 34px;
+      overflow: hidden;
+      border: 1.5px solid #d8ecee;
+      border-radius: 4px 4px 7px 7px;
+      background: #edf7f8;
+      transition: border-color 0.4s ease, transform 0.4s ease;
+    }
+
+    .cup::after {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      z-index: 2;
+      width: 3px;
+      height: 11px;
+      content: "";
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .cup-fill {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 0;
+      background: linear-gradient(180deg, #7edce7, #36b1d0 72%);
+      transition: height 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .cup.is-filled {
+      border-color: rgba(54, 173, 198, 0.52);
+      transform: translateY(-1px);
+    }
+
+    .intake-message {
+      min-height: 46px;
+      margin: 0 0 15px;
+      color: var(--ink-soft);
+      font-size: 14px;
+      font-weight: 550;
+      letter-spacing: 0.005em;
+      line-height: 1.65;
+    }
+
+    .quick-adds {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .quick-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 10px 7px;
+      color: var(--ink);
+      border: 1px solid #e8f3f4;
+      border-radius: 13px;
+      background: #f4fafb;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .quick-btn:hover {
+      border-color: #d4ebee;
+      background: #ebf8fa;
+      box-shadow: 0 10px 18px -17px rgba(16, 112, 136, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .quick-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .quick-plus {
+      color: #34a8c4;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .quick-btn strong {
+      font-size: 13.5px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quick-btn small {
+      margin-left: 1px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .drink-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      width: 100%;
+      min-height: 58px;
+      overflow: hidden;
+      color: #fff;
+      border-radius: 17px;
+      background: linear-gradient(135deg, #1c9dba 0%, #0d7896 100%);
+      box-shadow: 0 17px 27px -17px rgba(12, 112, 139, 0.86), inset 0 1px rgba(255, 255, 255, 0.16);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .drink-btn::after {
+      position: absolute;
+      top: -60%;
+      left: -36%;
+      width: 30%;
+      height: 220%;
+      content: "";
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+      transform: rotate(24deg);
+      transition: left 0.65s ease;
+    }
+
+    .drink-btn:hover {
+      box-shadow: 0 21px 32px -16px rgba(12, 112, 139, 0.9), inset 0 1px rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .drink-btn:hover::after {
+      left: 116%;
+    }
+
+    .drink-btn:active {
+      transform: translateY(0) scale(0.992);
+    }
+
+    .drink-btn-plus {
+      display: grid;
+      width: 27px;
+      height: 27px;
+      font-size: 18px;
+      font-weight: 500;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.15);
+      place-items: center;
+    }
+
+    .drink-btn-copy {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.15;
+    }
+
+    .drink-btn-copy strong {
+      font-size: 14px;
+      font-weight: 750;
+      letter-spacing: 0.02em;
+    }
+
+    .drink-btn-copy small {
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 9.5px;
+      font-weight: 550;
+      letter-spacing: 0.06em;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-top: auto;
+      padding-top: 19px;
+      border-top: 1px solid var(--line);
+    }
+
+    .stat {
+      position: relative;
+      text-align: center;
+    }
+
+    .stat + .stat::before {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 0;
+      width: 1px;
+      content: "";
+      background: var(--line);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+    }
+
+    .stat strong small {
+      color: var(--muted);
+      font-size: 8.5px;
+      font-weight: 600;
+    }
+
+    .stat > span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9.5px;
+      font-weight: 550;
+      letter-spacing: 0.02em;
+    }
+
+    .intake-tip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      padding: 10px 13px;
+      border: 1px solid #e9f4f4;
+      border-radius: 14px;
+      background: rgba(245, 251, 251, 0.8);
+    }
+
+    .tip-icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 25px;
+      height: 25px;
+      color: #2ba1bd;
+      border-radius: 9px;
+      background: #e6f7f9;
+      place-items: center;
+    }
+
+    .tip-icon svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .intake-tip p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.55;
+    }
+
+    .intake-tip strong {
+      color: var(--ink-soft);
+      font-weight: 750;
+    }
+
+    .reminder-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      padding: 25px 26px 22px;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.13);
+      background: linear-gradient(142deg, #103d4d 0%, #0e5a70 57%, #15809a 100%);
+      box-shadow: 0 30px 60px -36px rgba(7, 58, 73, 0.8);
+    }
+
+    .reminder-card::before {
+      position: absolute;
+      top: -118px;
+      right: -98px;
+      z-index: -1;
+      width: 270px;
+      height: 270px;
+      content: "";
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(105, 230, 241, 0.3), transparent 65%);
+    }
+
+    .reminder-card::after {
+      position: absolute;
+      bottom: -104px;
+      left: -76px;
+      z-index: -1;
+      width: 230px;
+      height: 230px;
+      content: "";
+      border: 1px solid rgba(148, 238, 245, 0.15);
+      border-radius: 50%;
+      box-shadow: 0 0 0 30px rgba(148, 238, 245, 0.025), 0 0 0 60px rgba(148, 238, 245, 0.02);
+    }
+
+    .reminder-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bell {
+      display: grid;
+      flex: 0 0 auto;
+      width: 43px;
+      height: 43px;
+      color: #bdf4fb;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.15);
+      place-items: center;
+    }
+
+    .bell svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .reminder-title {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .reminder-title h2 {
+      margin: 0;
+      color: #fff;
+      font-size: 19px;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+
+    .section-kicker.light {
+      color: #8de6f0;
+    }
+
+    .timer-state {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 9.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.07);
+      transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .timer-state i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transition: background 0.3s ease;
+    }
+
+    .timer-state.is-running {
+      color: #cdfaff;
+      border-color: rgba(111, 229, 241, 0.26);
+      background: rgba(111, 229, 241, 0.14);
+    }
+
+    .timer-state.is-running i {
+      background: #80f0f6;
+      box-shadow: 0 0 0 4px rgba(128, 240, 246, 0.1);
+      animation: blink 1.9s ease-in-out infinite;
+    }
+
+    .timer-body {
+      margin-top: 20px;
+    }
+
+    .timer-caption {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .timer-display {
+      margin-top: 1px;
+      color: #f7ffff;
+      font-family: "SFMono-Regular", "Cascadia Code", "Consolas", "PingFang SC", monospace;
+      font-size: 50px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+      line-height: 1.14;
+      text-shadow: 0 8px 28px rgba(1, 40, 52, 0.22);
+    }
+
+    .timer-hint {
+      min-height: 17px;
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .interval-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .interval {
+      padding: 9px 3px;
+      color: rgba(255, 255, 255, 0.64);
+      font-size: 10px;
+      font-weight: 600;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.04);
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .interval:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .interval.is-active {
+      color: #0b5a6d;
+      font-weight: 750;
+      border-color: #f8ffff;
+      background: #f8ffff;
+      box-shadow: 0 7px 16px -11px #001a23;
+    }
+
+    .timer-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .start-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 46px;
+      color: #0c5366;
+      font-size: 12.5px;
+      font-weight: 750;
+      border-radius: 13px;
+      background: #f8ffff;
+      box-shadow: 0 12px 22px -16px #001b25;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .start-btn:hover {
+      background: #fff;
+      box-shadow: 0 16px 24px -16px #001b25;
+      transform: translateY(-1px);
+    }
+
+    .start-btn:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .toggle-icon {
+      display: grid;
+      place-items: center;
+    }
+
+    .toggle-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .preview-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 12px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 10.5px;
+      font-weight: 600;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.06);
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .preview-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .preview-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .sound-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .switch {
+      display: block;
+      flex: 0 0 auto;
+      width: 38px;
+      height: 22px;
+      padding: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .switch span {
+      display: block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease;
+    }
+
+    .switch[aria-checked="true"] {
+      border-color: #64d6e4;
+      background: #64d6e4;
+    }
+
+    .switch[aria-checked="true"] span {
+      background: #0b5366;
+      transform: translateX(16px);
+    }
+
+    .sound-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      line-height: 1.35;
+    }
+
+    .sound-copy strong {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .sound-copy small {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 8.5px;
+    }
+
+    .log-card {
+      padding: 24px 26px 14px;
+    }
+
+    .log-card .card-heading {
+      align-items: center;
+      margin-bottom: 11px;
+    }
+
+    .log-count {
+      padding: 5px 9px;
+      color: #238ca4;
+      font-size: 9.5px;
+      font-weight: 700;
+      border-radius: 999px;
+      background: #eef9fa;
+    }
+
+    .log-list {
+      max-height: 178px;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      list-style: none;
+      scrollbar-color: #cde8ec transparent;
+      scrollbar-width: thin;
+    }
+
+    .log-list::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .log-list::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: #cde8ec;
+    }
+
+    .log-item {
+      display: grid;
+      grid-template-columns: 49px 18px minmax(0, 1fr);
+      gap: 6px;
+      align-items: center;
+      padding: 8px 2px;
+      border-top: 1px dashed rgba(22, 61, 74, 0.08);
+      animation: logIn 0.3s ease both;
+    }
+
+    .log-item:first-child {
+      border-top: 0;
+    }
+
+    .log-time {
+      color: var(--muted);
+      font-size: 10.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-mark {
+      display: grid;
+      place-items: center;
+    }
+
+    .log-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #83d8e5;
+      box-shadow: 0 0 0 4px #eefafa;
+    }
+
+    .log-amount {
+      justify-self: end;
+      color: var(--ink-soft);
+      font-size: 12px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-amount small {
+      color: var(--muted);
+      font-size: 8.5px;
+      font-weight: 550;
+    }
+
+    .log-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 107px;
+      padding: 13px 0 15px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .log-empty-icon {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      margin-bottom: 3px;
+      color: #5bbfd2;
+      border-radius: 50%;
+      background: #effafa;
+      place-items: center;
+    }
+
+    .log-empty-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .log-empty strong {
+      color: var(--ink-soft);
+      font-size: 11.5px;
+      font-weight: 650;
+    }
+
+    .log-empty small {
+      font-size: 9.5px;
+    }
+
+    .log-note {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0 0;
+      padding-top: 10px;
+      color: #7b959d;
+      font-size: 9px;
+      border-top: 1px solid var(--line);
+    }
+
+    .log-note svg {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 auto;
+    }
+
+    .site-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 25px 8px 0;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .site-footer p {
+      margin: 0;
+    }
+
+    .footer-made {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .footer-made span {
+      color: #ec9a92;
+      font-size: 11px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 26px;
+      left: 50%;
+      z-index: 160;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      max-width: calc(100% - 32px);
+      padding: 11px 17px 11px 12px;
+      color: #f5ffff;
+      font-size: 11.5px;
+      font-weight: 550;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(13, 53, 65, 0.95);
+      box-shadow: 0 18px 40px -22px rgba(6, 34, 43, 0.9);
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, 14px);
+      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, 0);
+    }
+
+    .toast-icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 21px;
+      height: 21px;
+      color: #a7f8ff;
+      border-radius: 50%;
+      background: rgba(117, 231, 241, 0.15);
+      place-items: center;
+    }
+
+    .toast-icon svg {
+      width: 11px;
+      height: 11px;
+    }
+
+    .reminder-pop {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 150;
+      width: 370px;
+      max-width: calc(100% - 32px);
+      padding: 23px;
+      overflow: hidden;
+      visibility: hidden;
+      opacity: 0;
+      border: 1px solid rgba(255, 255, 255, 0.96);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 34px 80px -36px rgba(8, 61, 77, 0.5), 0 0 0 1px rgba(25, 130, 153, 0.05);
+      transform: translateY(18px) scale(0.975);
+      transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.2, 0.85, 0.25, 1), visibility 0.32s ease;
+      backdrop-filter: blur(20px);
+    }
+
+    .reminder-pop::before {
+      position: absolute;
+      top: -68px;
+      right: -48px;
+      width: 178px;
+      height: 178px;
+      content: "";
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 213, 228, 0.21), transparent 66%);
+    }
+
+    .reminder-pop.is-visible {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .pop-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      display: grid;
+      width: 29px;
+      height: 29px;
+      color: #8ba2a9;
+      font-size: 17px;
+      font-weight: 400;
+      border-radius: 50%;
+      background: rgba(22, 61, 74, 0.04);
+      place-items: center;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .pop-close:hover {
+      color: var(--ink);
+      background: rgba(22, 61, 74, 0.08);
+    }
+
+    .pop-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-right: 28px;
+    }
+
+    .pop-icon {
+      display: grid;
+      flex: 0 0 auto;
+      width: 50px;
+      height: 50px;
+      color: #fff;
+      border-radius: 17px;
+      background: linear-gradient(145deg, #69d8e2, #168eae);
+      box-shadow: 0 12px 24px -16px rgba(14, 118, 143, 0.85), inset 0 1px rgba(255, 255, 255, 0.35);
+      place-items: center;
+    }
+
+    .pop-icon svg {
+      width: 27px;
+      height: 27px;
+    }
+
+    .pop-kicker {
+      margin: 0 0 3px;
+      color: #2a9bb3;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+    }
+
+    .pop-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+    }
+
+    .pop-desc {
+      position: relative;
+      z-index: 1;
+      margin: 14px 0 0;
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      line-height: 1.75;
+    }
+
+    .pop-progress {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 13px;
+      padding: 8px 10px;
+      color: #43808e;
+      font-size: 9.5px;
+      font-weight: 600;
+      border-radius: 11px;
+      background: #f1fafa;
+    }
+
+    .pop-progress i {
+      position: relative;
+      flex: 1;
+      height: 4px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #dff1f3;
+    }
+
+    .pop-progress i::after {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: var(--pop-progress, 0%);
+      content: "";
+      border-radius: inherit;
+      background: linear-gradient(90deg, #77dbe5, #23a6c3);
+      transition: width 0.4s ease;
+    }
+
+    .pop-actions {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .pop-primary,
+    .pop-secondary {
+      min-height: 43px;
+      font-size: 11.5px;
+      font-weight: 700;
+      border-radius: 12px;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pop-primary {
+      color: #fff;
+      background: linear-gradient(135deg, #22a3bf, #0e7e9c);
+      box-shadow: 0 12px 20px -15px rgba(8, 99, 124, 0.9);
+    }
+
+    .pop-primary:hover {
+      box-shadow: 0 16px 24px -14px rgba(8, 99, 124, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .pop-secondary {
+      color: var(--ink-soft);
+      border: 1px solid #e3eeee;
+      background: #f7fbfb;
+    }
+
+    .pop-secondary:hover {
+      background: #edf8f9;
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .confetti {
+      position: absolute;
+      top: -28px;
+      width: var(--size, 7px);
+      height: calc(var(--size, 7px) * 1.45);
+      opacity: 0;
+      border-radius: 50% 50% 50% 0;
+      animation: confettiFall var(--dur, 2.5s) ease-in var(--delay, 0s) forwards;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes floaty {
+      0%,
+      100% {
+        transform: translateY(0) rotate(-1deg);
+      }
+      50% {
+        transform: translateY(-8px) rotate(1deg);
+      }
+    }
+
+    @keyframes twinkle {
+      0%,
+      100% {
+        opacity: 0.35;
+        transform: scale(0.8) rotate(0deg);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.1) rotate(18deg);
+      }
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate3d(0, 0, 0) scale(1);
+      }
+      to {
+        transform: translate3d(28px, 20px, 0) scale(1.05);
+      }
+    }
+
+    @keyframes dotPulse {
+      0% {
+        opacity: 0.8;
+        transform: scale(0.7);
+      }
+      70%,
+      100% {
+        opacity: 0;
+        transform: scale(1.7);
+      }
+    }
+
+    @keyframes blink {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.35;
+      }
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 11px) scale(0.92);
+      }
+      18% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -52px) scale(1.04);
+      }
+    }
+
+    @keyframes logIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes confettiFall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, 0, 0) rotate(0deg);
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drift, 0px), 106vh, 0) rotate(620deg);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .page {
+        width: min(1080px, calc(100% - 48px));
+      }
+
+      .dashboard {
+        grid-template-columns: minmax(0, 1.35fr) minmax(310px, 0.9fr);
+      }
+
+      .intake-main {
+        grid-template-columns: 228px minmax(0, 1fr);
+        gap: 25px;
+      }
+
+      .ring-wrap {
+        width: 228px;
+        height: 228px;
+      }
+
+      .cups {
+        gap: 6px;
+      }
+
+      .cup {
+        width: 23px;
+        height: 32px;
+      }
+
+      .mascot {
+        flex-basis: 215px;
+        width: 215px;
+      }
+
+      .drop-svg {
+        width: 166px;
+      }
+    }
+
+    @media (max-width: 1020px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+        align-items: start;
+      }
+
+      .intake-main {
+        grid-template-columns: 250px minmax(0, 1fr);
+      }
+
+      .ring-wrap {
+        width: 250px;
+        height: 250px;
+      }
+
+      .hero {
+        padding-top: 44px;
+        padding-bottom: 38px;
+      }
+
+      .mascot {
+        flex-basis: 205px;
+        width: 205px;
+      }
+
+      .drop-svg {
+        width: 156px;
+      }
+
+      .mascot-note {
+        right: -5px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: calc(100% - 32px);
+        padding-top: 18px;
+      }
+
+      .hero {
+        gap: 16px;
+        padding: 38px 2px 32px;
+      }
+
+      .hero h1 {
+        margin-top: 13px;
+        margin-bottom: 14px;
+        font-size: clamp(39px, 8.5vw, 54px);
+      }
+
+      .hero-sub {
+        font-size: 13px;
+        line-height: 1.8;
+      }
+
+      .mascot {
+        flex: 0 0 145px;
+        width: 145px;
+        min-height: 150px;
+        margin-right: 0;
+      }
+
+      .mascot::before {
+        width: 146px;
+        height: 146px;
+      }
+
+      .mascot::after {
+        width: 160px;
+        height: 120px;
+      }
+
+      .drop-svg {
+        width: 122px;
+      }
+
+      .mascot-note {
+        display: none;
+      }
+
+      .spark {
+        display: none;
+      }
+
+      .side {
+        grid-template-columns: 1fr;
+      }
+
+      .log-list {
+        max-height: 200px;
+      }
+
+      .site-footer {
+        padding-top: 20px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .topbar {
+        gap: 12px;
+      }
+
+      .brand-mark {
+        width: 37px;
+        height: 37px;
+        border-radius: 12px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+      }
+
+      .brand-name small {
+        font-size: 6.5px;
+      }
+
+      .today-pill {
+        gap: 7px;
+        padding: 8px 11px;
+        font-size: 10px;
+      }
+
+      .today-clock,
+      .today-divider {
+        display: none;
+      }
+
+      .hero {
+        align-items: flex-start;
+      }
+
+      .mascot {
+        flex-basis: 104px;
+        width: 104px;
+        min-height: 120px;
+        margin-top: 12px;
+      }
+
+      .mascot::before {
+        width: 104px;
+        height: 104px;
+      }
+
+      .mascot::after {
+        width: 115px;
+        height: 85px;
+      }
+
+      .drop-svg {
+        width: 92px;
+      }
+
+      .eyebrow {
+        gap: 7px;
+        font-size: 7.5px;
+        letter-spacing: 0.15em;
+      }
+
+      .eyebrow::before {
+        width: 16px;
+      }
+
+      .hero h1 {
+        font-size: clamp(34px, 9.5vw, 45px);
+        letter-spacing: -0.06em;
+      }
+
+      .hero-sub {
+        max-width: 290px;
+        font-size: 12px;
+      }
+
+      .card {
+        border-radius: 25px;
+      }
+
+      .intake-card {
+        padding: 24px 20px 20px;
+      }
+
+      .card-heading h2 {
+        font-size: 19px;
+      }
+
+      .intake-main {
+        grid-template-columns: 1fr;
+        gap: 17px;
+        margin-top: 11px;
+      }
+
+      .ring-wrap {
+        width: 218px;
+        height: 218px;
+        margin: 3px auto 0;
+      }
+
+      .ring-wrap::before {
+        inset: 26px;
+      }
+
+      .ring-number > span {
+        font-size: 39px;
+      }
+
+      .intake-detail {
+        padding-top: 0;
+      }
+
+      .cups {
+        justify-content: center;
+        margin-bottom: 12px;
+      }
+
+      .cup {
+        width: 24px;
+        height: 33px;
+      }
+
+      .intake-message {
+        min-height: 0;
+        margin-bottom: 13px;
+        text-align: center;
+        font-size: 12.5px;
+      }
+
+      .quick-btn {
+        padding: 10px 5px;
+      }
+
+      .drink-btn {
+        min-height: 56px;
+      }
+
+      .stats {
+        margin-top: 20px;
+      }
+
+      .intake-tip {
+        margin-top: 16px;
+      }
+
+      .reminder-card {
+        padding: 22px 20px 19px;
+      }
+
+      .timer-display {
+        font-size: 47px;
+      }
+
+      .log-card {
+        padding: 22px 20px 13px;
+      }
+
+      .site-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 7px;
+        padding: 20px 3px 0;
+      }
+
+      .toast {
+        top: 13px;
+        bottom: auto;
+        font-size: 10.5px;
+      }
+
+      .reminder-pop {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        width: auto;
+        max-width: none;
+        padding: 20px;
+        border-radius: 23px;
+      }
+
+      .pop-desc {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .page {
+        width: calc(100% - 24px);
+      }
+
+      .brand-name small {
+        display: none;
+      }
+
+      .today-pill {
+        padding: 8px 9px;
+        font-size: 9px;
+      }
+
+      .mascot {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 39px;
+      }
+
+      .intake-card {
+        padding-right: 17px;
+        padding-left: 17px;
+      }
+
+      .ring-wrap {
+        width: 204px;
+        height: 204px;
+      }
+
+      .quick-btn strong {
+        font-size: 12.5px;
+      }
+
+      .stat strong {
+        font-size: 15px;
+      }
+
+      .timer-state {
+        padding: 5px 7px;
+        font-size: 8.5px;
+      }
+
+      .reminder-title h2 {
+        font-size: 17px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <span class="orb orb--one"></span>
+    <span class="orb orb--two"></span>
+    <span class="orb orb--three"></span>
+  </div>
+
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2.9C10.8 6 6.6 9.9 6.6 13.8a5.4 5.4 0 0 0 10.8 0C17.4 9.9 13.2 6 12 2.9Z" fill="currentColor"/>
+            <path d="M9.8 14.1c0 1.4.8 2.5 2 2.9" stroke="#3AAFC9" stroke-width="1.35" stroke-linecap="round" opacity=".6"/>
+          </svg>
+        </span>
+        <span class="brand-name">
+          小雯的喝水小站
+          <small>FOR XIAOWEN</small>
+        </span>
+      </div>
+      <div class="today-pill">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span id="todayLabel">今天</span>
+        <span class="today-divider" aria-hidden="true"></span>
+        <span class="today-clock" id="clockLabel">--:--</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="小雯的喝水小站">
+        <div class="hero-copy">
+          <p class="eyebrow">A LITTLE REMINDER FOR XIAOWEN</p>
+          <h1>小雯，<br><span class="highlight">好好喝水</span>呀。</h1>
+          <p class="hero-sub">每一次补充，都是给身体的温柔回应。让小水滴陪着你，把喝水变成一件轻松的小事。</p>
+        </div>
+
+        <div class="mascot" aria-hidden="true">
+          <div class="mascot-note">小雯，慢慢喝～</div>
+          <span class="spark spark--one">✦</span>
+          <span class="spark spark--two">✦</span>
+          <span class="spark spark--three">●</span>
+          <svg class="drop-svg" viewBox="0 0 190 210">
+            <defs>
+              <linearGradient id="dropGradient" x1="40" y1="30" x2="150" y2="200" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#9ce8f1"/>
+                <stop offset="0.48" stop-color="#61c9e1"/>
+                <stop offset="1" stop-color="#259dc1"/>
+              </linearGradient>
+              <linearGradient id="shineGradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ffffff" stop-opacity=".75"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="95" cy="200" rx="52" ry="6" fill="#5baec1" opacity=".14"/>
+            <path d="M95 13C85.5 51 29 92 29 136.5a66 66 0 0 0 132 0C161 92 104.5 51 95 13Z" fill="url(#dropGradient)"/>
+            <path d="M59 107c-10.5 13.8-14 29.7-12 44.7" stroke="url(#shineGradient)" stroke-width="9" stroke-linecap="round" fill="none"/>
+            <ellipse cx="62" cy="157" rx="9.5" ry="5.2" fill="#f29a9a" opacity=".42"/>
+            <ellipse cx="128" cy="157" rx="9.5" ry="5.2" fill="#f29a9a" opacity=".42"/>
+            <ellipse cx="70" cy="139" rx="5.2" ry="7" fill="#174b5b"/>
+            <ellipse cx="120" cy="139" rx="5.2" ry="7" fill="#174b5b"/>
+            <circle cx="71.8" cy="136.4" r="1.7" fill="#fff"/>
+            <circle cx="121.8" cy="136.4" r="1.7" fill="#fff"/>
+            <path d="M85.5 153c6 6.2 13 6.2 19 0" stroke="#174b5b" stroke-width="3.3" stroke-linecap="round" fill="none"/>
+            <circle cx="77" cy="181" r="4" fill="#fff" opacity=".22"/>
+            <circle cx="110" cy="174" r="2.6" fill="#fff" opacity=".26"/>
+            <circle cx="98" cy="186" r="1.8" fill="#fff" opacity=".2"/>
+          </svg>
+        </div>
+      </section>
+
+      <div class="dashboard">
+        <section class="card intake-card" id="intakeCard" aria-labelledby="intakeHeading">
+          <header class="card-heading">
+            <div>
+              <p class="section-kicker">TODAY'S WATER</p>
+              <h2 id="intakeHeading">今日饮水</h2>
+            </div>
+            <div class="heading-side">
+              <span class="goal-badge" id="goalBadge" hidden>已达标</span>
+              <button class="reset-btn" id="resetBtn" type="button" title="清空今日饮水记录">重置</button>
+            </div>
+          </header>
+
+          <div class="intake-main">
+            <div class="ring-wrap" id="ringWrap" role="progressbar" aria-label="今日饮水进度" aria-valuemin="0" aria-valuemax="2000" aria-valuenow="0" aria-valuetext="已喝 0 毫升，目标 2000 毫升">
+              <svg class="ring-svg" viewBox="0 0 250 250" aria-hidden="true">
+                <defs>
+                  <linearGradient id="ringGradient" x1="36" y1="36" x2="216" y2="216" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#8ce4ea"/>
+                    <stop offset="0.54" stop-color="#3bbad6"/>
+                    <stop offset="1" stop-color="#0b7f9f"/>
+                  </linearGradient>
+                </defs>
+                <circle class="ring-track" cx="125" cy="125" r="101"/>
+                <circle class="ring-progress" id="ringProgress" cx="125" cy="125" r="101" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 125 125)"/>
+              </svg>
+              <div class="float-layer" id="floatLayer" aria-hidden="true"></div>
+              <div class="ring-center">
+                <span class="ring-kicker">今日已喝</span>
+                <div class="ring-number"><span id="mlValue">0</span><small>ml</small></div>
+                <span class="ring-goal">目标 2,000 ml</span>
+              </div>
+            </div>
+
+            <div class="intake-detail">
+              <div class="cups" id="cups" role="img" aria-label="今日还没有饮水记录">
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+                <span class="cup"><span class="cup-fill"></span></span>
+              </div>
+
+              <p class="intake-message" id="intakeMessage">新的一天，从第一杯温水开始。</p>
+
+              <div class="quick-adds" role="group" aria-label="快速添加饮水量">
+                <button class="quick-btn" type="button" data-add="150">
+                  <span class="quick-plus">+</span><span><strong>150</strong> <small>ml</small></span>
+                </button>
+                <button class="quick-btn" type="button" data-add="250">
+                  <span class="quick-plus">+</span><span><strong>250</strong> <small>ml</small></span>
+                </button>
+                <button class="quick-btn" type="button" data-add="350">
+                  <span class="quick-plus">+</span><span><strong>350</strong> <small>ml</small></span>
+                </button>
+              </div>
+
+              <button class="drink-btn" id="drinkBtn" type="button">
+                <span class="drink-btn-plus" aria-hidden="true">+</span>
+                <span class="drink-btn-copy">
+                  <strong>喝了一杯</strong>
+                  <small>250 ml · 记下这一口</small>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong id="progressStat">0%</strong>
+              <span>目标完成</span>
+            </div>
+            <div class="stat">
+              <strong id="cupStat">0</strong>
+              <span>杯水下肚</span>
+            </div>
+            <div class="stat">
+              <strong><span id="leftStat">2,000</span> <small>ml</small></strong>
+              <span>还需补充</span>
+            </div>
+          </div>
+
+          <div class="intake-tip">
+            <span class="tip-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 3.2C10.9 6.2 7 9.8 7 13.4a5 5 0 0 0 10 0C17 9.8 13.1 6.2 12 3.2Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M9.8 14.1c.1 1.2.8 2.1 1.8 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <p><strong>喝水小贴士</strong> · 少量多次，每次约 150–250 ml，别等口渴才喝。</p>
+          </div>
+        </section>
+
+        <div class="side">
+          <section class="card reminder-card" aria-labelledby="reminderHeading">
+            <header class="reminder-head">
+              <span class="bell" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M6.8 10.2c0-3 2.2-5.4 5.2-5.4s5.2 2.4 5.2 5.4v3.1l1.2 2.2c.3.6-.1 1.3-.8 1.3H6.4c-.7 0-1.1-.7-.8-1.3l1.2-2.2v-3.1Z" stroke="currentColor" stroke-width="1.55" stroke-linejoin="round"/>
+                  <path d="M10 19c.45.8 1.15 1.2 2 1.2s1.55-.4 2-1.2" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <div class="reminder-title">
+                <p class="section-kicker light">WATER ALARM</p>
+                <h2 id="reminderHeading">喝水闹钟</h2>
+              </div>
+              <span class="timer-state" id="timerState">
+                <i aria-hidden="true"></i>
+                <span id="timerStateText">未开启</span>
+              </span>
+            </header>
+
+            <div class="timer-body">
+              <p class="timer-caption" id="timerCaption">提醒间隔</p>
+              <div class="timer-display" id="timerDisplay" role="timer" aria-label="距离下一次提醒">30:00</div>
+              <p class="timer-hint" id="timerHint">选一个节奏，或点「预览」看看提醒效果。</p>
+            </div>
+
+            <div class="interval-group" role="group" aria-label="提醒间隔">
+              <button class="interval" type="button" data-minutes="15" aria-pressed="false">15 分钟</button>
+              <button class="interval is-active" type="button" data-minutes="30" aria-pressed="true">30 分钟</button>
+              <button class="interval" type="button" data-minutes="45" aria-pressed="false">45 分钟</button>
+              <button class="interval" type="button" data-minutes="60" aria-pressed="false">60 分钟</button>
+            </div>
+
+            <div class="timer-actions">
+              <button class="start-btn" id="timerToggle" type="button" aria-pressed="false">
+                <span class="toggle-icon" id="timerToggleIcon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M8.2 5.8v12.4L18 12 8.2 5.8Z" fill="currentColor"/>
+                  </svg>
+                </span>
+                <span id="timerToggleText">开始提醒</span>
+              </button>
+              <button class="preview-btn" id="previewBtn" type="button" title="立即预览提醒效果">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6.8 10.2c0-3 2.2-5.4 5.2-5.4s5.2 2.4 5.2 5.4v3.1l1.2 2.2c.3.6-.1 1.3-.8 1.3H6.4c-.7 0-1.1-.7-.8-1.3l1.2-2.2v-3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  <path d="M10 19c.45.8 1.15 1.2 2 1.2s1.55-.4 2-1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+                预览
+              </button>
+            </div>
+
+            <div class="sound-row">
+              <button class="switch" id="soundToggle" type="button" role="switch" aria-checked="true" aria-label="轻柔提示音">
+                <span></span>
+              </button>
+              <div class="sound-copy" aria-hidden="true">
+                <strong>轻柔提示音</strong>
+                <small>到点时“叮”一声</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="card log-card" aria-labelledby="logHeading">
+            <header class="card-heading">
+              <div>
+                <p class="section-kicker">DAILY LOG</p>
+                <h2 id="logHeading">今日记录</h2>
+              </div>
+              <span class="log-count" id="logCount">0 次</span>
+            </header>
+            <ul class="log-list" id="logList">
+              <li class="log-empty">
+                <span class="log-empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3.1C10.8 6.3 6.5 10 6.5 13.9a5.5 5.5 0 0 0 11 0C17.5 10 13.2 6.3 12 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <strong>还没有喝水记录</strong>
+                <small>喝下第一杯，就从这里开始。</small>
+              </li>
+            </ul>
+            <p class="log-note">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="1.6"/>
+                <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+              记录只保存在当前浏览器
+            </p>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>少量多次，慢慢喝。每一次补充，都算数。</p>
+      <p class="footer-made">给小雯的专属喝水提醒 <span aria-hidden="true">♥</span></p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+    <span class="toast-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="m5 12.5 4.2 4.2L19 6.9" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </span>
+    <span id="toastText"></span>
+  </div>
+
+  <aside class="reminder-pop" id="reminderPop" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true">
+    <button class="pop-close" id="popClose" type="button" aria-label="关闭提醒">×</button>
+    <div class="pop-head">
+      <span class="pop-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2.9C10.9 6.2 6.5 10.1 6.5 14a5.5 5.5 0 0 0 11 0C17.5 10.1 13.1 6.2 12 2.9Z" fill="currentColor"/>
+          <ellipse cx="9.9" cy="14" rx=".85" ry="1.15" fill="#0b6179"/>
+          <ellipse cx="14.1" cy="14" rx=".85" ry="1.15" fill="#0b6179"/>
+          <path d="M10.4 16.2c.5.5 1 .7 1.6.7s1.1-.2 1.6-.7" stroke="#0b6179" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <div>
+        <p class="pop-kicker">WATER O'CLOCK</p>
+        <h3 class="pop-title" id="popTitle">小雯，该喝水啦</h3>
+      </div>
+    </div>
+    <p class="pop-desc" id="popDesc">小雯，手边的事情先放一放，慢慢喝几口水吧。</p>
+    <div class="pop-progress" id="popProgressWrap">
+      <span id="popProgressText">今日已喝 0 ml · 0%</span>
+      <i aria-hidden="true"></i>
+    </div>
+    <div class="pop-actions">
+      <button class="pop-primary" id="popDrink" type="button">喝了 250 ml</button>
+      <button class="pop-secondary" id="popSnooze" type="button">10 分钟后</button>
+    </div>
+  </aside>
+
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var GOAL = 2000;
+      var CUP_SIZE = 250;
+      var STORAGE_KEY = "drink-water-demo-v1";
+      var INTERVALS = [15, 30, 45, 60];
+      var BASE_TITLE = "小雯的喝水小站 · 记得喝水呀";
+      var numberFormatter = new Intl.NumberFormat("zh-CN");
+
+      var state = loadState();
+      var tickHandle = null;
+      var toastHandle = null;
+      var resetHandle = null;
+      var resetArmed = false;
+      var audioContext = null;
+
+      var els = {
+        todayLabel: document.getElementById("todayLabel"),
+        clockLabel: document.getElementById("clockLabel"),
+        intakeCard: document.getElementById("intakeCard"),
+        resetBtn: document.getElementById("resetBtn"),
+        goalBadge: document.getElementById("goalBadge"),
+        ringWrap: document.getElementById("ringWrap"),
+        ringProgress: document.getElementById("ringProgress"),
+        mlValue: document.getElementById("mlValue"),
+        cups: document.getElementById("cups"),
+        intakeMessage: document.getElementById("intakeMessage"),
+        progressStat: document.getElementById("progressStat"),
+        cupStat: document.getElementById("cupStat"),
+        leftStat: document.getElementById("leftStat"),
+        floatLayer: document.getElementById("floatLayer"),
+        drinkBtn: document.getElementById("drinkBtn"),
+        timerState: document.getElementById("timerState"),
+        timerStateText: document.getElementById("timerStateText"),
+        timerCaption: document.getElementById("timerCaption"),
+        timerDisplay: document.getElementById("timerDisplay"),
+        timerHint: document.getElementById("timerHint"),
+        timerToggle: document.getElementById("timerToggle"),
+        timerToggleText: document.getElementById("timerToggleText"),
+        timerToggleIcon: document.getElementById("timerToggleIcon"),
+        previewBtn: document.getElementById("previewBtn"),
+        soundToggle: document.getElementById("soundToggle"),
+        logList: document.getElementById("logList"),
+        logCount: document.getElementById("logCount"),
+        toast: document.getElementById("toast"),
+        toastText: document.getElementById("toastText"),
+        reminderPop: document.getElementById("reminderPop"),
+        popTitle: document.getElementById("popTitle"),
+        popDesc: document.getElementById("popDesc"),
+        popProgressText: document.getElementById("popProgressText"),
+        popProgressWrap: document.getElementById("popProgressWrap"),
+        popDrink: document.getElementById("popDrink"),
+        popSnooze: document.getElementById("popSnooze"),
+        popClose: document.getElementById("popClose"),
+        confettiLayer: document.getElementById("confettiLayer")
+      };
+
+      init();
+
+      function init() {
+        if (state.running && (!state.endsAt || state.endsAt <= Date.now())) {
+          state.endsAt = Date.now() + state.interval * 60000;
+          saveState();
+        }
+
+        if (!state.running) {
+          state.endsAt = null;
+        }
+
+        bindEvents();
+        updateClock();
+        renderIntake();
+        renderLogs();
+        renderTimer();
+
+        els.soundToggle.setAttribute("aria-checked", String(state.sound));
+
+        if (state.running) {
+          startTicker();
+        }
+
+        window.setInterval(updateClock, 10000);
+      }
+
+      function bindEvents() {
+        els.drinkBtn.addEventListener("click", function () {
+          addWater(CUP_SIZE);
+        });
+
+        document.querySelectorAll(".quick-btn").forEach(function (button) {
+          button.addEventListener("click", function () {
+            addWater(Number(button.getAttribute("data-add")));
+          });
+        });
+
+        document.querySelectorAll(".interval").forEach(function (button) {
+          button.addEventListener("click", function () {
+            setIntervalMinutes(Number(button.getAttribute("data-minutes")));
+          });
+        });
+
+        els.timerToggle.addEventListener("click", toggleTimer);
+        els.previewBtn.addEventListener("click", function () {
+          showReminder();
+          playChime();
+        });
+
+        els.soundToggle.addEventListener("click", toggleSound);
+        els.resetBtn.addEventListener("click", handleReset);
+
+        els.popDrink.addEventListener("click", function () {
+          hideReminder(els.drinkBtn);
+          addWater(CUP_SIZE);
+        });
+
+        els.popSnooze.addEventListener("click", function () {
+          hideReminder(els.timerToggle);
+          state.running = true;
+          state.endsAt = Date.now() + 10 * 60000;
+          saveState();
+          renderTimer();
+          startTicker();
+          showToast("好，10 分钟后再提醒小雯。");
+        });
+
+        els.popClose.addEventListener("click", function () {
+          hideReminder(els.previewBtn);
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            hideReminder();
+            disarmReset();
+          }
+        });
+
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden && state.running) {
+            tick();
+          }
+        });
+      }
+
+      function todayKey(date) {
+        var day = date || new Date();
+        return day.getFullYear() + "-" +
+          String(day.getMonth() + 1).padStart(2, "0") + "-" +
+          String(day.getDate()).padStart(2, "0");
+      }
+
+      function freshState() {
+        return {
+          date: todayKey(),
+          ml: 0,
+          logs: [],
+          interval: 30,
+          running: false,
+          endsAt: null,
+          sound: true
+        };
+      }
+
+      function loadState() {
+        var saved = null;
+
+        try {
+          saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "null");
+        } catch (error) {
+          saved = null;
+        }
+
+        if (!saved || typeof saved !== "object" || saved.date !== todayKey()) {
+          return freshState();
+        }
+
+        var interval = INTERVALS.indexOf(Number(saved.interval)) !== -1
+          ? Number(saved.interval)
+          : 30;
+        var logs = Array.isArray(saved.logs)
+          ? saved.logs
+              .filter(function (item) {
+                return item &&
+                  Number.isFinite(Number(item.amount)) &&
+                  Number(item.amount) > 0 &&
+                  Number.isFinite(Number(item.time));
+              })
+              .map(function (item) {
+                return {
+                  amount: Math.round(Number(item.amount)),
+                  time: Number(item.time)
+                };
+              })
+              .slice(-60)
+          : [];
+        var ml = Number.isFinite(Number(saved.ml))
+          ? Math.max(0, Math.round(Number(saved.ml)))
+          : 0;
+        var savedEndsAt = Number(saved.endsAt);
+        var running = Boolean(saved.running);
+        var endsAt = Number.isFinite(savedEndsAt) && savedEndsAt > 0 ? savedEndsAt : null;
+
+        if (!running) {
+          endsAt = null;
+        } else if (!endsAt || endsAt <= Date.now()) {
+          endsAt = Date.now() + interval * 60000;
+        }
+
+        return {
+          date: saved.date,
+          ml: ml,
+          logs: logs,
+          interval: interval,
+          running: running,
+          endsAt: endsAt,
+          sound: saved.sound !== false
+        };
+      }
+
+      function saveState() {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+          // The page still works when browser storage is unavailable.
+        }
+      }
+
+      function formatNumber(value) {
+        return numberFormatter.format(Math.max(0, Math.round(value)));
+      }
+
+      function formatClock(date) {
+        return String(date.getHours()).padStart(2, "0") + ":" +
+          String(date.getMinutes()).padStart(2, "0");
+      }
+
+      function updateClock() {
+        var now = new Date();
+        var weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+
+        els.todayLabel.textContent = (now.getMonth() + 1) + " 月 " + now.getDate() +
+          " 日 · 周" + weekdays[now.getDay()];
+        els.clockLabel.textContent = formatClock(now);
+
+        if (state.date !== todayKey(now)) {
+          state.date = todayKey(now);
+          state.ml = 0;
+          state.logs = [];
+          hideReminder();
+          saveState();
+          renderIntake();
+          renderLogs();
+          showToast("新的一天，记得喝水呀。");
+        }
+      }
+
+      function addWater(amount) {
+        var value = Math.round(Number(amount));
+        if (!Number.isFinite(value) || value <= 0) {
+          return;
+        }
+
+        var wasBelowGoal = state.ml < GOAL;
+        hideReminder();
+
+        state.ml += value;
+        state.logs.push({
+          amount: value,
+          time: Date.now()
+        });
+
+        if (state.logs.length > 60) {
+          state.logs = state.logs.slice(-60);
+        }
+
+        saveState();
+        renderIntake();
+        renderLogs();
+        showFloatAmount(value);
+
+        if (wasBelowGoal && state.ml >= GOAL) {
+          celebrate();
+          showToast("小雯今日饮水达标，真棒！");
+        } else if (state.ml >= GOAL) {
+          showToast("咕嘟咕嘟，又记下 " + value + " ml。");
+        } else {
+          showToast("已记下 " + value + " ml，继续保持～");
+        }
+      }
+
+      function showFloatAmount(amount) {
+        var node = document.createElement("span");
+        node.className = "float-amount";
+        node.textContent = "+" + formatNumber(amount) + " ml";
+        els.floatLayer.appendChild(node);
+        window.setTimeout(function () {
+          node.remove();
+        }, 1200);
+      }
+
+      function getIntakeMessage(percent) {
+        if (state.ml >= GOAL) {
+          return "今日饮水达标，给你一朵小水花！";
+        }
+        if (state.ml === 0) {
+          return "新的一天，从第一杯温水开始。";
+        }
+        if (percent < 25) {
+          return "第一杯下肚，身体正在悄悄说谢谢。";
+        }
+        if (percent < 50) {
+          return "嗓子润润的，状态也慢慢回来啦。";
+        }
+        if (percent < 75) {
+          return "进度不错，再来一杯刚刚好。";
+        }
+        return "只差一点点，今日目标就在眼前。";
+      }
+
+      function renderIntake() {
+        var percent = Math.min(100, (state.ml / GOAL) * 100);
+        var roundedPercent = Math.round(percent);
+        var cupCount = state.ml / CUP_SIZE;
+        var remaining = Math.max(0, GOAL - state.ml);
+
+        els.mlValue.textContent = formatNumber(state.ml);
+        els.ringProgress.style.strokeDashoffset = String(100 - percent);
+        els.ringProgress.style.opacity = percent <= 0 ? "0" : "1";
+        els.progressStat.textContent = roundedPercent + "%";
+        els.leftStat.textContent = formatNumber(remaining);
+        els.cupStat.textContent = Number.isInteger(cupCount)
+          ? String(cupCount)
+          : cupCount.toFixed(1);
+        els.intakeMessage.textContent = getIntakeMessage(percent);
+        els.goalBadge.hidden = state.ml < GOAL;
+        els.intakeCard.classList.toggle("is-complete", state.ml >= GOAL);
+
+        els.ringWrap.setAttribute("aria-valuenow", String(Math.min(GOAL, state.ml)));
+        els.ringWrap.setAttribute("aria-valuetext",
+          "已喝 " + state.ml + " 毫升，目标 " + GOAL + " 毫升");
+
+        var cups = els.cups.querySelectorAll(".cup");
+        cups.forEach(function (cup, index) {
+          var fill = Math.max(0, Math.min(1, (state.ml - index * CUP_SIZE) / CUP_SIZE));
+          cup.querySelector(".cup-fill").style.height = (fill * 100) + "%";
+          cup.classList.toggle("is-filled", fill >= 0.999);
+        });
+
+        var fullCups = Math.floor(state.ml / CUP_SIZE);
+        els.cups.setAttribute("aria-label",
+          "已喝 " + fullCups + " 杯，共 " + state.ml + " 毫升，目标 8 杯");
+      }
+
+      function renderLogs() {
+        els.logCount.textContent = state.logs.length + " 次";
+
+        if (state.logs.length === 0) {
+          els.logList.innerHTML =
+            '<li class="log-empty">' +
+              '<span class="log-empty-icon" aria-hidden="true">' +
+                '<svg viewBox="0 0 24 24" fill="none">' +
+                  '<path d="M12 3.1C10.8 6.3 6.5 10 6.5 13.9a5.5 5.5 0 0 0 11 0C17.5 10 13.2 6.3 12 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
+                '</svg>' +
+              '</span>' +
+              '<strong>还没有喝水记录</strong>' +
+              '<small>喝下第一杯，就从这里开始。</small>' +
+            '</li>';
+          return;
+        }
+
+        var fragment = document.createDocumentFragment();
+        var records = state.logs.slice().sort(function (a, b) {
+          return b.time - a.time;
+        });
+
+        records.forEach(function (record) {
+          var item = document.createElement("li");
+          var time = document.createElement("span");
+          var mark = document.createElement("span");
+          var dot = document.createElement("span");
+          var amount = document.createElement("span");
+
+          item.className = "log-item";
+          item.setAttribute("aria-label", formatClock(new Date(record.time)) + " 喝了 " + record.amount + " 毫升");
+
+          time.className = "log-time";
+          time.textContent = formatClock(new Date(record.time));
+
+          mark.className = "log-mark";
+          dot.className = "log-dot";
+          mark.appendChild(dot);
+
+          amount.className = "log-amount";
+          amount.appendChild(document.createTextNode("+" + record.amount + " "));
+          var unit = document.createElement("small");
+          unit.textContent = "ml";
+          amount.appendChild(unit);
+
+          item.appendChild(time);
+          item.appendChild(mark);
+          item.appendChild(amount);
+          fragment.appendChild(item);
+        });
+
+        els.logList.replaceChildren(fragment);
+      }
+
+      function setIntervalMinutes(minutes) {
+        if (INTERVALS.indexOf(minutes) === -1 || minutes === state.interval) {
+          return;
+        }
+
+        state.interval = minutes;
+
+        if (state.running) {
+          state.endsAt = Date.now() + minutes * 60000;
+        }
+
+        saveState();
+        renderTimer();
+        showToast("提醒间隔已改为 " + minutes + " 分钟。");
+      }
+
+      function toggleTimer() {
+        state.running = !state.running;
+
+        if (state.running) {
+          state.endsAt = Date.now() + state.interval * 60000;
+          ensureAudioContext();
+          saveState();
+          renderTimer();
+          startTicker();
+          showToast("好，每 " + state.interval + " 分钟提醒小雯一次。");
+        } else {
+          state.endsAt = null;
+          saveState();
+          stopTicker();
+          hideReminder();
+          renderTimer();
+          showToast("喝水提醒已暂停。");
+        }
+      }
+
+      function renderTimer() {
+        var isRunning = state.running;
+        var interval = state.interval;
+
+        els.timerState.classList.toggle("is-running", isRunning);
+        els.timerStateText.textContent = isRunning ? "提醒中" : "未开启";
+        els.timerCaption.textContent = isRunning ? "下一次提醒" : "提醒间隔";
+        els.timerHint.textContent = isRunning
+          ? "每 " + interval + " 分钟，轻轻提醒小雯一次。"
+          : "选一个节奏，或点「预览」看看提醒效果。";
+        els.timerToggleText.textContent = isRunning ? "暂停提醒" : "开始提醒";
+        els.timerToggle.setAttribute("aria-pressed", String(isRunning));
+        els.timerToggleIcon.innerHTML = isRunning
+          ? '<svg viewBox="0 0 24 24" fill="none"><rect x="7" y="5" width="3.5" height="14" rx="1.4" fill="currentColor"/><rect x="13.5" y="5" width="3.5" height="14" rx="1.4" fill="currentColor"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none"><path d="M8.2 5.8v12.4L18 12 8.2 5.8Z" fill="currentColor"/></svg>';
+
+        document.querySelectorAll(".interval").forEach(function (button) {
+          var active = Number(button.getAttribute("data-minutes")) === interval;
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+
+        if (isRunning && state.endsAt) {
+          paintCountdown(Math.max(0, state.endsAt - Date.now()));
+        } else {
+          paintCountdown(interval * 60000);
+        }
+      }
+
+      function paintCountdown(milliseconds) {
+        var totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+        var minutes = Math.floor(totalSeconds / 60);
+        var seconds = totalSeconds % 60;
+        els.timerDisplay.textContent =
+          String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+      }
+
+      function startTicker() {
+        if (tickHandle) {
+          return;
+        }
+        tickHandle = window.setInterval(tick, 250);
+        tick();
+      }
+
+      function stopTicker() {
+        if (tickHandle) {
+          window.clearInterval(tickHandle);
+          tickHandle = null;
+        }
+      }
+
+      function tick() {
+        if (!state.running || !state.endsAt) {
+          return;
+        }
+
+        var remaining = state.endsAt - Date.now();
+
+        if (remaining <= 0) {
+          handleTimerDue();
+          return;
+        }
+
+        paintCountdown(remaining);
+      }
+
+      function handleTimerDue() {
+        state.endsAt = Date.now() + state.interval * 60000;
+        saveState();
+        paintCountdown(state.endsAt - Date.now());
+        showReminder();
+        playChime();
+      }
+
+      function showReminder() {
+        var percent = Math.min(100, Math.round((state.ml / GOAL) * 100));
+        var title = "小雯，该喝水啦";
+        var description = "小雯，手边的事情先放一放，慢慢喝几口水吧。";
+
+        if (state.ml >= GOAL) {
+          title = "小雯，再润润嗓子吧";
+          description = "小雯，今天的目标已经完成啦，再喝一小口润润嗓子就好。";
+        } else if (percent < 30) {
+          description = "小雯，忙碌的时候也要照顾自己，先喝几口水再继续吧。";
+        } else if (percent < 60) {
+          description = "小雯，杯子已经等你一会儿啦。放下手头的事，慢慢喝几口。";
+        } else if (percent < 85) {
+          description = "小雯，今天进度很不错，再补充一点水分就更好啦。";
+        } else {
+          description = "小雯，就快完成今日目标了，小小一口也算数。";
+        }
+
+        els.popTitle.textContent = title;
+        els.popDesc.textContent = description;
+        els.popProgressText.textContent =
+          "今日已喝 " + formatNumber(state.ml) + " ml · " + percent + "%";
+        els.popProgressWrap.style.setProperty("--pop-progress", percent + "%");
+
+        els.reminderPop.classList.add("is-visible");
+        els.reminderPop.setAttribute("aria-hidden", "false");
+        document.title = "💧 小雯，该喝水啦";
+      }
+
+      function hideReminder(focusTarget) {
+        if (!els.reminderPop.classList.contains("is-visible")) {
+          return;
+        }
+
+        if (els.reminderPop.contains(document.activeElement)) {
+          var target = focusTarget || els.previewBtn;
+          try {
+            target.focus({ preventScroll: true });
+          } catch (error) {
+            target.focus();
+          }
+        }
+
+        els.reminderPop.classList.remove("is-visible");
+        els.reminderPop.setAttribute("aria-hidden", "true");
+        document.title = BASE_TITLE;
+      }
+
+      function toggleSound() {
+        state.sound = !state.sound;
+        els.soundToggle.setAttribute("aria-checked", String(state.sound));
+        saveState();
+
+        if (state.sound) {
+          playChime();
+          showToast("轻柔提示音已开启。");
+        } else {
+          showToast("提示音已关闭。");
+        }
+      }
+
+      function ensureAudioContext() {
+        if (!state.sound) {
+          return null;
+        }
+
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) {
+          return null;
+        }
+
+        if (!audioContext) {
+          try {
+            audioContext = new AudioContextClass();
+          } catch (error) {
+            return null;
+          }
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume().catch(function () {});
+        }
+
+        return audioContext;
+      }
+
+      function playChime() {
+        if (!state.sound) {
+          return;
+        }
+
+        var context = ensureAudioContext();
+        if (!context) {
+          return;
+        }
+
+        function ring() {
+          var start = context.currentTime + 0.035;
+          var notes = [880, 1108.73, 1318.51];
+
+          notes.forEach(function (frequency, index) {
+            var oscillator = context.createOscillator();
+            var gain = context.createGain();
+            var noteStart = start + index * 0.13;
+            var noteEnd = noteStart + 0.48;
+
+            oscillator.type = "sine";
+            oscillator.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.0001, noteStart);
+            gain.gain.exponentialRampToValueAtTime(0.055, noteStart + 0.035);
+            gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+            oscillator.start(noteStart);
+            oscillator.stop(noteEnd + 0.03);
+          });
+        }
+
+        if (context.state === "suspended") {
+          context.resume().then(ring).catch(function () {});
+        } else {
+          ring();
+        }
+      }
+
+      function handleReset() {
+        if (!resetArmed) {
+          resetArmed = true;
+          els.resetBtn.textContent = "确认？";
+          els.resetBtn.classList.add("is-armed");
+          els.resetBtn.setAttribute("aria-label", "再次点击确认清空今日记录");
+          resetHandle = window.setTimeout(disarmReset, 3200);
+          return;
+        }
+
+        disarmReset();
+        hideReminder();
+        state.ml = 0;
+        state.logs = [];
+        saveState();
+        renderIntake();
+        renderLogs();
+        showToast("今日记录已清空，重新开始吧。");
+      }
+
+      function disarmReset() {
+        resetArmed = false;
+        els.resetBtn.textContent = "重置";
+        els.resetBtn.classList.remove("is-armed");
+        els.resetBtn.setAttribute("aria-label", "清空今日饮水记录");
+        if (resetHandle) {
+          window.clearTimeout(resetHandle);
+          resetHandle = null;
+        }
+      }
+
+      function showToast(message) {
+        if (toastHandle) {
+          window.clearTimeout(toastHandle);
+        }
+
+        els.toastText.textContent = message;
+        els.toast.classList.add("is-visible");
+        toastHandle = window.setTimeout(function () {
+          els.toast.classList.remove("is-visible");
+          toastHandle = null;
+        }, 2600);
+      }
+
+      function celebrate() {
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
+
+        var colors = ["#5dcbdd", "#8ce3d7", "#ffd087", "#ffa4a4", "#a7dfeb"];
+
+        for (var index = 0; index < 28; index += 1) {
+          var piece = document.createElement("span");
+          var size = 4 + Math.random() * 7;
+
+          piece.className = "confetti";
+          piece.style.left = (Math.random() * 100) + "%";
+          piece.style.background = colors[index % colors.length];
+          piece.style.setProperty("--size", size + "px");
+          piece.style.setProperty("--drift", ((Math.random() - 0.5) * 180) + "px");
+          piece.style.setProperty("--dur", (2 + Math.random() * 1.5) + "s");
+          piece.style.setProperty("--delay", (Math.random() * 0.4) + "s");
+
+          if (Math.random() > 0.45) {
+            piece.style.borderRadius = "50%";
+          }
+
+          els.confettiLayer.appendChild(piece);
+          window.setTimeout(function (node) {
+            return function () {
+              node.remove();
+            };
+          }(piece), 4300);
+        }
+      }
+    }());
+  </script>
+</body>
+</html>
